@@ -41,6 +41,27 @@ export default function HomeScreen({ navigation }) {
     }
 
     setSelectedImage({ localUri: pickerResult.uri });
+    await compressImageAndSendToNewScreen(pickerResult.uri);
+  };
+
+  let compressImageAndSendToNewScreen = async (uri) => {
+    try {
+      const resizedPhoto = await ImageManipulator.manipulateAsync(
+        uri,
+        [{ resize: { width: 300 } }],
+        { compress: 0.7, format: ImageManipulator.SaveFormat.PNG }
+      );
+      console.log("Manipulated", resizedPhoto);
+      const resizedB64 = await FileSystem.readAsStringAsync(resizedPhoto.uri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      navigation.navigate("Details", {
+        uri: resizedPhoto.uri,
+        b64: resizedB64,
+      });
+    } catch (err) {
+      console.log(err);
+    }
   };
   return (
     <Container>

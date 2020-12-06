@@ -20,7 +20,7 @@ function MainStackScreen() {
       <Stack.Screen
         name="Details"
         component={DetailsScreen}
-        options={{ headerShown: false }}
+        options={{ title: "Assist" }}
       />
     </Stack.Navigator>
   );

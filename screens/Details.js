@@ -97,21 +97,27 @@ export default function DetailsScreen({ route, navigation }) {
     <DetailsContainer>
       <Image
         source={{ uri: uri }}
-        style={{ height: "80%", width: "100%", resizeMode: "cover" }}
+        style={{
+          height: "60%",
+          width: "100%",
+          resizeMode: "cover",
+        }}
       />
       <CodeContainer>
-        <QuestionTitle>To Solve:</QuestionTitle>
-        <Text>{asciiMathData}</Text>
-        <CalculateButton
+        <QuestionTitle>Solve</QuestionTitle>
+        <QuestionSection>{asciiMathData}</QuestionSection>
+        <CalcContainer
           onPress={() => {
             console.log("Calculate button clicked");
             navigation.navigate("MyModal", {
               urlEncodedInput: urlEncodedInput,
             });
           }}
-          title="Calculate"
-          color="#841584"
-        />
+        >
+          <Calculate>
+            <CalcText>Calculate</CalcText>
+          </Calculate>
+        </CalcContainer>
       </CodeContainer>
     </DetailsContainer>
   );
@@ -119,8 +125,6 @@ export default function DetailsScreen({ route, navigation }) {
 
 const DetailsContainer = styled.View`
   flex: 1;
-  align-items: center;
-  justify-content: center;
 `;
 
 const LoadingContainer = styled.View`
@@ -135,11 +139,44 @@ const CodeContainer = styled.View`
   justify-content: center;
 `;
 
-const CalculateButton = styled.Button`
-  flex: 1;
+const QuestionTitle = styled.Text`
+  position: absolute;
+  left: 10px;
+  top: 10px;
+  font-size: 32px;
+  font-weight: 800;
 `;
 
-const QuestionTitle = styled.Text`
-  font-size: 16px;
-  font-weight: 500;
+const QuestionSection = styled.Text`
+  /* position: absolute;
+  top: 60px;
+  left: 10px; */
+  font-size: 20px;
+  font-weight: 300;
+  margin-bottom: 70px;
+`;
+
+const CalcContainer = styled.TouchableOpacity`
+  position: absolute;
+  bottom: 40px;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+`;
+
+const Calculate = styled.View`
+  width: 90%;
+  height: 54px;
+  margin: auto;
+  border-radius: 5px;
+  /* border: 1px solid #000000; */
+  background-color: #ffffff;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+`;
+
+const CalcText = styled.Text`
+  font-size: 18px;
+  font-weight: 700;
 `;
