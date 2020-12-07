@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Image, ActivityIndicator, Text, Button, View } from "react-native";
+import { Image, ActivityIndicator, Text } from "react-native";
 import styled from "styled-components";
 import { MATHPIX_API_ENDPOINT, MATHPIX_APP_ID, MATHPIX_API_KEY } from "@env";
 
@@ -11,13 +11,9 @@ export default function DetailsScreen({ route, navigation }) {
   });
   const [asciiMathData, setAsciiMathData] = useState(null);
 
-  console.log("ENV VALUES", MATHPIX_API_KEY, MATHPIX_APP_ID);
   const { uri, b64 } = route.params;
-  console.log("uri", uri);
 
   useEffect(() => {
-    console.log("Executed now");
-
     const API_HEADERS = {
       headers: {
         "Content-Type": "application/json",
@@ -49,7 +45,6 @@ export default function DetailsScreen({ route, navigation }) {
         return res.json();
       })
       .then((data) => {
-        console.log("Data obtained");
         console.log(JSON.stringify(data));
         try {
           let asciimathArray = data.data;
@@ -108,7 +103,6 @@ export default function DetailsScreen({ route, navigation }) {
         <QuestionSection>{asciiMathData}</QuestionSection>
         <CalcContainer
           onPress={() => {
-            console.log("Calculate button clicked");
             navigation.navigate("MyModal", {
               urlEncodedInput: urlEncodedInput,
             });
@@ -148,9 +142,6 @@ const QuestionTitle = styled.Text`
 `;
 
 const QuestionSection = styled.Text`
-  /* position: absolute;
-  top: 60px;
-  left: 10px; */
   font-size: 20px;
   font-weight: 300;
   margin-bottom: 70px;
@@ -169,7 +160,6 @@ const Calculate = styled.View`
   height: 54px;
   margin: auto;
   border-radius: 5px;
-  /* border: 1px solid #000000; */
   background-color: #ffffff;
   align-items: center;
   justify-content: center;

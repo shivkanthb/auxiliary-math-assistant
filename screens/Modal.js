@@ -1,13 +1,5 @@
-import React, { useState, useEffect } from "react";
-import {
-  Image,
-  ActivityIndicator,
-  Text,
-  Button,
-  View,
-  SafeAreaView,
-  StatusBar,
-} from "react-native";
+import React from "react";
+import { StatusBar } from "react-native";
 import { WebView } from "react-native-webview";
 import styled from "styled-components";
 import { Ionicons } from "@expo/vector-icons";
@@ -19,25 +11,22 @@ export default function ModalScreen({ route, navigation }) {
     "https://www.wolframalpha.com/input/?i=" + urlEncodedInput;
 
   return (
-    <>
-      <SolutionContainer>
-        <StatusBar hidden />
-        <DismissContainer onPress={() => navigation.goBack()}>
-          {/* <XCircleComponent style={{ color: "#333" }} /> */}
-          <CloseView>
-            <Ionicons
-              name="ios-close"
-              size={36}
-              style={{ marginLeft: 10, marginTop: -2 }}
-            />
-          </CloseView>
-        </DismissContainer>
-        <WebView
-          source={{ uri: WOLFRAMALPHA_URL }}
-          style={{ marginTop: 70, flex: 1, width: "100%" }}
-        />
-      </SolutionContainer>
-    </>
+    <SolutionContainer>
+      <StatusBar hidden />
+      <DismissContainer onPress={() => navigation.goBack()}>
+        <CloseView>
+          <Ionicons
+            name="ios-close"
+            size={36}
+            style={{ marginLeft: 10, marginTop: -2 }}
+          />
+        </CloseView>
+      </DismissContainer>
+      <WebView
+        source={{ uri: WOLFRAMALPHA_URL }}
+        style={{ marginTop: 70, flex: 1, width: "100%" }}
+      />
+    </SolutionContainer>
   );
 }
 

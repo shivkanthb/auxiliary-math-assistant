@@ -81,14 +81,12 @@ export default function HomeScreen({ navigation }) {
               onPress={async () => {
                 if (camera) {
                   let photo = await camera.takePictureAsync();
-                  console.log("Photo", photo);
                   try {
                     const resizedPhoto = await ImageManipulator.manipulateAsync(
                       photo.uri,
                       [{ resize: { width: 300 } }],
                       { compress: 0.7, format: ImageManipulator.SaveFormat.PNG }
                     );
-                    console.log("Manipulated", resizedPhoto);
                     const resizedB64 = await FileSystem.readAsStringAsync(
                       resizedPhoto.uri,
                       {
