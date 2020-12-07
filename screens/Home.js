@@ -51,7 +51,6 @@ export default function HomeScreen({ navigation }) {
         [{ resize: { width: 300 } }],
         { compress: 0.7, format: ImageManipulator.SaveFormat.PNG }
       );
-      console.log("Manipulated", resizedPhoto);
       const resizedB64 = await FileSystem.readAsStringAsync(resizedPhoto.uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
@@ -81,25 +80,7 @@ export default function HomeScreen({ navigation }) {
               onPress={async () => {
                 if (camera) {
                   let photo = await camera.takePictureAsync();
-                  try {
-                    const resizedPhoto = await ImageManipulator.manipulateAsync(
-                      photo.uri,
-                      [{ resize: { width: 300 } }],
-                      { compress: 0.7, format: ImageManipulator.SaveFormat.PNG }
-                    );
-                    const resizedB64 = await FileSystem.readAsStringAsync(
-                      resizedPhoto.uri,
-                      {
-                        encoding: FileSystem.EncodingType.Base64,
-                      }
-                    );
-                    navigation.navigate("Details", {
-                      uri: resizedPhoto.uri,
-                      b64: resizedB64,
-                    });
-                  } catch (err) {
-                    console.log(err);
-                  }
+                  await compressImageAndSendToNewScreen(photo.uri);
                 }
               }}
             >
