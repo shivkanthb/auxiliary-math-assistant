@@ -15,3 +15,7 @@ And provide the values for `MATHPIX_API_KEY` and `MATHPIX_APP_ID`
 ```
 expo start
 ```
+
+## Demo
+
+<img src="https://user-images.githubusercontent.com/3232159/101301354-68cd6480-37ed-11eb-9c8e-8f6108b7b150.gif" />
