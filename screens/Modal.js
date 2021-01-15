@@ -17,8 +17,8 @@ export default function ModalScreen({ route, navigation }) {
         <CloseView>
           <Ionicons
             name="ios-close"
-            size={36}
-            style={{ marginLeft: 10, marginTop: -2 }}
+            size={32}
+            style={{ marginLeft: 10, marginTop: 0 }}
           />
         </CloseView>
       </DismissContainer>

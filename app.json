@@ -1,12 +1,12 @@
 {
   "expo": {
-    "name": "expo-camera",
-    "slug": "expo-camera",
+    "name": "Euler - math assist",
+    "slug": "euler-math-assist",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/icon.png",
+    "icon": "./assets/euler.png",
     "splash": {
-      "image": "./assets/splash.png",
+      "image": "./assets/splash-euler.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },

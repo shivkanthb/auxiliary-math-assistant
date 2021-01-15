@@ -1,5 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Text, View, TouchableOpacity } from "react-native";
+import {
+  Text,
+  View,
+  TouchableOpacity,
+  Dimensions,
+  StyleSheet,
+} from "react-native";
 import { Camera } from "expo-camera";
 import styled from "styled-components";
 import * as ImagePicker from "expo-image-picker";
@@ -11,6 +17,33 @@ export default function HomeScreen({ navigation }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [selectedImage, setSelectedImage] = useState(null);
+  const [deviceOrientation, setDeviceOrientation] = useState("portrait");
+
+  /**
+   * Returns true if the screen is in portrait mode
+   */
+  const isPortrait = () => {
+    const dim = Dimensions.get("screen");
+    return dim.height >= dim.width;
+  };
+
+  /**
+   * Returns true of the screen is in landscape mode
+   */
+  const isLandscape = () => {
+    const dim = Dimensions.get("screen");
+    return dim.width >= dim.height;
+  };
+
+  // Event Listener for orientation changes
+  Dimensions.addEventListener("change", () => {
+    // console.log("Orientation CHANGE ", isPortrait() ? "portrait" : "landscape");
+    if (isLandscape()) {
+      setDeviceOrientation("landscape");
+    } else {
+      setDeviceOrientation("portrait");
+    }
+  });
 
   useEffect(() => {
     (async () => {
@@ -44,11 +77,27 @@ export default function HomeScreen({ navigation }) {
     await compressImageAndSendToNewScreen(pickerResult.uri);
   };
 
-  let compressImageAndSendToNewScreen = async (uri) => {
+  let compressImageAndSendToNewScreen = async (uri, clipImage = false) => {
+    let manipulatorOptions = [];
+    if (clipImage) {
+      manipulatorOptions = [
+        { resize: { width: Dimensions.get("window").width } },
+        {
+          crop: {
+            originX: 0,
+            originY: 200,
+            width: Dimensions.get("window").width,
+            height: 200,
+          },
+        },
+      ];
+    } else {
+      manipulatorOptions = [{ resize: { width: 300 } }];
+    }
     try {
       const resizedPhoto = await ImageManipulator.manipulateAsync(
         uri,
-        [{ resize: { width: 300 } }],
+        manipulatorOptions,
         { compress: 0.7, format: ImageManipulator.SaveFormat.PNG }
       );
       const resizedB64 = await FileSystem.readAsStringAsync(resizedPhoto.uri, {
@@ -71,6 +120,17 @@ export default function HomeScreen({ navigation }) {
         style={{ flex: 1 }}
         type={type}
       >
+        {deviceOrientation === "portrait" ? (
+          <>
+            <LayerTop />
+            <LayerCenter>
+              <LayerCenterFocussed />
+            </LayerCenter>
+            <LayerBottom />
+          </>
+        ) : (
+          <></>
+        )}
         <CameraContainer>
           <Wrapper>
             <PickImageContainer onPress={openImagePickerAsync}>
@@ -80,7 +140,7 @@ export default function HomeScreen({ navigation }) {
               onPress={async () => {
                 if (camera) {
                   let photo = await camera.takePictureAsync();
-                  await compressImageAndSendToNewScreen(photo.uri);
+                  await compressImageAndSendToNewScreen(photo.uri, true);
                 }
               }}
             >
@@ -110,10 +170,15 @@ const Container = styled.View`
 
 const CameraContainer = styled.View`
   flex: 1;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
   background-color: transparent;
   flex-direction: row;
   align-items: flex-end;
-  margin-bottom: 50px;
+  /* margin-bottom: 50px; */
 `;
 const CameraButton = styled.View`
   border-width: 2px;
@@ -145,4 +210,37 @@ const Wrapper = styled.View`
   align-items: center;
   flex-direction: row;
   justify-content: space-evenly;
+  background-color: transparent;
+  margin-bottom: 50px;
+`;
+
+const LayerTop = styled.View`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 200px;
+  width: 100%;
+  background-color: "rgba(0, 0, 0, .6)";
+`;
+
+const LayerCenter = styled.View`
+  display: flex;
+  flex-direction: column;
+  top: 200px;
+  height: 200px;
+`;
+
+const LayerBottom = styled.View`
+  position: absolute;
+  top: 400px; /* 200 + 200 */
+  left: 0;
+  width: 100%;
+  flex-grow: 1; /* crucial! fills up the remaining space at the bottom */
+  height: 100%;
+  background-color: "rgba(0, 0, 0, .6)";
+`;
+
+const LayerCenterFocussed = styled.View`
+  height: 100%;
+  width: 100%;
 `;

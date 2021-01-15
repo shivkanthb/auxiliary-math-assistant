@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { Image, ActivityIndicator, Text } from "react-native";
 import styled from "styled-components";
-import { MATHPIX_API_ENDPOINT, MATHPIX_APP_ID, MATHPIX_API_KEY } from "@env";
+import Constants from "expo-constants";
+// import { MATHPIX_API_ENDPOINT, MATHPIX_APP_ID, MATHPIX_API_KEY } from "@env";
 
 export default function DetailsScreen({ route, navigation }) {
   const [imageProcessing, setImageProcessing] = useState(true);
@@ -10,7 +11,11 @@ export default function DetailsScreen({ route, navigation }) {
     message: null,
   });
   const [asciiMathData, setAsciiMathData] = useState(null);
-
+  const {
+    MATHPIX_API_ENDPOINT,
+    MATHPIX_API_KEY,
+    MATHPIX_APP_ID,
+  } = Constants.manifest.extra;
   const { uri, b64 } = route.params;
 
   useEffect(() => {
@@ -80,7 +85,7 @@ export default function DetailsScreen({ route, navigation }) {
   if (processingError.error) {
     return (
       <DetailsContainer>
-        <Text>{processingError.message}</Text>
+        <ErrorText>{processingError.message}</ErrorText>
       </DetailsContainer>
     );
   }
@@ -93,9 +98,9 @@ export default function DetailsScreen({ route, navigation }) {
       <Image
         source={{ uri: uri }}
         style={{
-          height: "60%",
+          height: 200,
           width: "100%",
-          resizeMode: "cover",
+          resizeMode: "contain",
         }}
       />
       <CodeContainer>
@@ -119,6 +124,13 @@ export default function DetailsScreen({ route, navigation }) {
 
 const DetailsContainer = styled.View`
   flex: 1;
+`;
+
+const ErrorText = styled.Text`
+  flex: 1;
+  text-align: center;
+  margin: 100px 0;
+  font-weight: 500;
 `;
 
 const LoadingContainer = styled.View`
