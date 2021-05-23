@@ -16,8 +16,8 @@ const { WOLFREEALPHA_API_ENDPOINT } = Constants.manifest.extra;
 
 export default function ModalScreen({ route, navigation }) {
   const { urlEncodedInput, inputString } = route.params;
-  console.log("Input encoded: ", urlEncodedInput);
-  console.log("Input String: ", inputString);
+  // console.log("Input encoded: ", urlEncodedInput);
+  // console.log("Input String: ", inputString);
   const WOLFRAMALPHA_URL =
     "https://www.wolframalpha.com/input/?i=" + urlEncodedInput;
   const [apiResult, setApiResult] = useState();

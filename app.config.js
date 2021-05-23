@@ -40,5 +40,6 @@ export default {
     MATHPIX_API_ENDPOINT: process.env.MATHPIX_API_ENDPOINT,
     MATHPIX_APP_ID: process.env.MATHPIX_APP_ID,
     MATHPIX_API_KEY: process.env.MATHPIX_API_KEY,
+    WOLFREEALPHA_API_ENDPOINT: process.env.WOLFREEALPHA_API_ENDPOINT,
   },
 };
