@@ -11,11 +11,8 @@ export default function DetailsScreen({ route, navigation }) {
     message: null,
   });
   const [asciiMathData, setAsciiMathData] = useState(null);
-  const {
-    MATHPIX_API_ENDPOINT,
-    MATHPIX_API_KEY,
-    MATHPIX_APP_ID,
-  } = Constants.manifest.extra;
+  const { MATHPIX_API_ENDPOINT, MATHPIX_API_KEY, MATHPIX_APP_ID } =
+    Constants.manifest.extra;
   const { uri, b64 } = route.params;
 
   useEffect(() => {
@@ -110,6 +107,7 @@ export default function DetailsScreen({ route, navigation }) {
           onPress={() => {
             navigation.navigate("MyModal", {
               urlEncodedInput: urlEncodedInput,
+              inputString: asciiMathData,
             });
           }}
         >
