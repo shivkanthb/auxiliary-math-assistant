@@ -18,6 +18,14 @@ export default {
   ios: {
     supportsTablet: true,
     bundleIdentifier: "com.shivkanth.euler",
+    infoPlist: {
+      NSCameraUsageDescription:
+        "Euler Assist requires access to your camera to capture photos of mathematical content",
+      NSPhotoLibraryUsageDescription:
+        "Euler Assist needs to access your camera roll in order to process and evaluate the selected image",
+      NSPhotoLibraryAddUsageDescription:
+        "Euler Assist needs to access your camera roll so that you can upload images processed by Euler.",
+    },
   },
   android: {
     adaptiveIcon: {

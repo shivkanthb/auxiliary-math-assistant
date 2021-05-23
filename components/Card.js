@@ -6,12 +6,10 @@ import Accordion from "./Accordion";
 export default function Card(props) {
   const { pod } = props;
   const subPods = pod.subpods;
-  console.log("Pod title: ", pod.title);
   return (
     <Container>
       <Title>{pod.title}</Title>
       {subPods.map((subPod, index) => {
-        console.log(subPod.img.src);
         return (
           <View key={index}>
             {subPod.title && subPod.title.length > 0 ? (
@@ -23,7 +21,7 @@ export default function Card(props) {
               plaintext={subPod.plaintext}
             />
             {subPod.plaintext && subPod.plaintext.length > 0 ? (
-              <Text>{subPod.plaintext}</Text>
+              <PlainText>{subPod.plaintext}</PlainText>
             ) : null}
           </View>
         );
@@ -46,7 +44,11 @@ const Title = styled.Text`
 const SubpodTitle = styled.Text`
   font-weight: 700;
   font-size: 18px;
-  margin: 10px 0;
+  margin: 20px 0 0 0;
 `;
 
-const WolframImage = styled.Image``;
+const PlainText = styled.Text`
+  font-weight: 500;
+  font-size: 16px;
+  line-height: 20px;
+`;

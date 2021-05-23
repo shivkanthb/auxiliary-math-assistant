@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import styled from "styled-components";
 import { View, Text, TouchableOpacity, Image } from "react-native";
+import { AntDesign } from "@expo/vector-icons";
 
 export default function Accordion(props) {
   const { title, img, plaintext } = props;
@@ -9,11 +10,24 @@ export default function Accordion(props) {
   const handleClick = () => setIsOpen(!isOpen);
   return (
     <Container>
-      <TouchableOpacity onPress={handleClick}>
-        <Text style={{ fontWeight: "700" }}>Expand</Text>
+      <TouchableOpacity
+        onPress={handleClick}
+        style={{
+          display: "flex",
+          flexDirection: "row",
+          alignItems: "center",
+          alignContent: "center",
+        }}
+      >
+        <AntDesign
+          name={isOpen ? "caretdown" : "caretright"}
+          size={12}
+          color="black"
+        />
+        <Text style={{ fontWeight: "700", marginLeft: 5 }}>Expand</Text>
       </TouchableOpacity>
       {isOpen ? (
-        <View>
+        <View style={{ marginTop: 10 }}>
           <Image
             source={{
               uri: img?.src,
@@ -33,5 +47,5 @@ const Container = styled.View`
   background-color: #fff;
   padding: 10px;
   border-radius: 5px;
-  margin: 5px 0;
+  margin: 10px 0;
 `;

@@ -9,8 +9,10 @@ import {
 import { WebView } from "react-native-webview";
 import styled from "styled-components";
 import { Ionicons } from "@expo/vector-icons";
-import MathJax from "react-native-mathjax";
 import Card from "../components/Card";
+import Constants from "expo-constants";
+
+const { WOLFREEALPHA_API_ENDPOINT } = Constants.manifest.extra;
 
 export default function ModalScreen({ route, navigation }) {
   const { urlEncodedInput, inputString } = route.params;
@@ -31,8 +33,7 @@ export default function ModalScreen({ route, navigation }) {
       const data = {
         input: inputString,
       };
-      const url = "https://aarmusk.api.stdlib.com/wolfreealpha@dev/";
-      let response = await fetch(url, {
+      let response = await fetch(WOLFREEALPHA_API_ENDPOINT, {
         method: "POST",
         headers: new Headers({
           "Content-Type": "application/json",
@@ -44,20 +45,9 @@ export default function ModalScreen({ route, navigation }) {
       setLoading(false);
     } catch (err) {
       console.error(err);
+      setApiError(true);
+      setLoading(false);
     }
-  };
-
-  const Results = () => {
-    const numPods = apiResult.numpods;
-    const pods = apiResult.pods;
-    console.log(pods);
-    const render = pods
-      .map((pod, index) => {
-        return <Text>{pod.title}</Text>;
-      })
-      .join("");
-    console.log(render);
-    return <Text>Hello</Text>;
   };
 
   return (
@@ -72,14 +62,21 @@ export default function ModalScreen({ route, navigation }) {
           />
         </CloseView>
       </DismissContainer>
+      {apiError ? (
+        <View style={{ marginTop: 90 }}>
+          <Text style={{ textAlign: "center" }}>
+            Something went wrong. Try again later!
+          </Text>
+        </View>
+      ) : null}
       <ScrollView showsVerticalScrollIndicator={false}>
-        {loading ? (
+        {loading && !apiError ? (
           <LoadingContainer>
             <ActivityIndicator color="#333" />
           </LoadingContainer>
         ) : (
           <ResultContainer>
-            {apiResult.pods.map((pod, index) => {
+            {apiResult?.pods.map((pod, index) => {
               return <Card key={index} pod={pod} />;
             })}
           </ResultContainer>
@@ -90,15 +87,16 @@ export default function ModalScreen({ route, navigation }) {
 }
 
 const LoadingContainer = styled.View`
-  margin-top: 70px;
   flex: 1;
+  margin-top: 90px;
+
   justify-content: center;
   align-items: center;
-  background-color: blue;
 `;
 
 const ResultContainer = styled.View`
   margin-top: 90px;
+  margin-bottom: 30px;
   padding: 0 20px;
 `;
 
