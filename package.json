@@ -23,13 +23,14 @@
     "react-dom": "16.13.1",
     "react-native": "https://github.com/expo/react-native/archive/sdk-39.0.4.tar.gz",
     "react-native-dotenv": "^2.4.3",
-    "react-native-gesture-handler": "~1.7.0",
+    "react-native-gesture-handler": "^1.7.0",
     "react-native-reanimated": "~1.13.0",
     "react-native-safe-area-context": "3.1.4",
     "react-native-screens": "~2.10.1",
     "react-native-svg": "^12.1.0",
     "react-native-web": "~0.13.12",
     "react-native-webview": "10.7.0",
+    "reanimated-bottom-sheet": "^1.0.0-alpha.22",
     "styled-components": "^5.2.1"
   },
   "devDependencies": {

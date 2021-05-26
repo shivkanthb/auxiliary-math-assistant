@@ -5,6 +5,7 @@ import {
   TouchableOpacity,
   Dimensions,
   StyleSheet,
+  Image,
 } from "react-native";
 import { Camera } from "expo-camera";
 import styled from "styled-components";
@@ -12,12 +13,36 @@ import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { RefreshIconComponent, ImageIconComponent } from "../assets/icons";
 import * as ImageManipulator from "expo-image-manipulator";
+import Animated from "react-native-reanimated";
+import BottomSheet from "reanimated-bottom-sheet";
 
 export default function HomeScreen({ navigation }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
   const [selectedImage, setSelectedImage] = useState(null);
   const [deviceOrientation, setDeviceOrientation] = useState("portrait");
+  const sheetRef = React.useRef(null);
+  const [resizedPhotoUri, setResizedPhotoUri] = useState(null);
+
+  const renderContent = () => (
+    <View
+      style={{
+        backgroundColor: "white",
+        padding: 20,
+        height: 500,
+      }}
+    >
+      <Header>Solve</Header>
+      <Image
+        source={{ uri: resizedPhotoUri }}
+        style={{
+          height: 200,
+          width: "100%",
+          resizeMode: "contain",
+        }}
+      />
+    </View>
+  );
 
   /**
    * Returns true if the screen is in portrait mode
@@ -61,7 +86,8 @@ export default function HomeScreen({ navigation }) {
   let camera;
 
   let openImagePickerAsync = async () => {
-    let permissionResult = await ImagePicker.requestCameraRollPermissionsAsync();
+    let permissionResult =
+      await ImagePicker.requestCameraRollPermissionsAsync();
 
     if (permissionResult.granted === false) {
       alert("Permission to access camera roll is required!");
@@ -103,10 +129,12 @@ export default function HomeScreen({ navigation }) {
       const resizedB64 = await FileSystem.readAsStringAsync(resizedPhoto.uri, {
         encoding: FileSystem.EncodingType.Base64,
       });
-      navigation.navigate("Details", {
-        uri: resizedPhoto.uri,
-        b64: resizedB64,
-      });
+      setResizedPhotoUri(resizedPhoto.uri);
+      sheetRef.current.snapTo(0);
+      // navigation.navigate("Details", {
+      //   uri: resizedPhoto.uri,
+      //   b64: resizedB64,
+      // });
     } catch (err) {
       console.log(err);
     }
@@ -160,6 +188,12 @@ export default function HomeScreen({ navigation }) {
           </Wrapper>
         </CameraContainer>
       </Camera>
+      <BottomSheet
+        ref={sheetRef}
+        snapPoints={[500, 300, 0]}
+        borderRadius={10}
+        renderContent={renderContent}
+      />
     </Container>
   );
 }
@@ -243,4 +277,10 @@ const LayerBottom = styled.View`
 const LayerCenterFocussed = styled.View`
   height: 100%;
   width: 100%;
+`;
+
+const Header = styled.Text`
+  font-weight: 800;
+  font-size: 32px;
+  margin-bottom: 20px;
 `;
