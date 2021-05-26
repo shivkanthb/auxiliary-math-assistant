@@ -7,6 +7,7 @@ import {
   StyleSheet,
   Image,
   TextInput,
+  ActivityIndicator,
 } from "react-native";
 import { Camera } from "expo-camera";
 import styled from "styled-components";
@@ -14,8 +15,8 @@ import * as ImagePicker from "expo-image-picker";
 import * as FileSystem from "expo-file-system";
 import { RefreshIconComponent, ImageIconComponent } from "../assets/icons";
 import * as ImageManipulator from "expo-image-manipulator";
-import Animated from "react-native-reanimated";
 import BottomSheet from "reanimated-bottom-sheet";
+import Constants from "expo-constants";
 
 export default function HomeScreen({ navigation }) {
   const [hasPermission, setHasPermission] = useState(null);
@@ -24,10 +25,86 @@ export default function HomeScreen({ navigation }) {
   const [deviceOrientation, setDeviceOrientation] = useState("portrait");
   const sheetRef = React.useRef(null);
   const [resizedPhotoUri, setResizedPhotoUri] = useState(null);
-  const [asciiMathData, setAsciiMathData] = useState(
-    "3x+2=5, 3x+2=5, 3x+2=5,3x+2=5, 3x+2=5,3x+2=5"
+  const [isSheetOpen, setIsSheetOpen] = useState(false);
+  const [bgImage, setBgImage] = useState(null);
+  const [asciiMathData, setAsciiMathData] = useState(null);
+  const [imageProcessing, setImageProcessing] = useState(false);
+  const INITIAL_PROCESSINGERROR = {
+    error: false,
+    message: null,
+  };
+  const [processingError, setProcessingError] = useState(
+    INITIAL_PROCESSINGERROR
   );
-  const [sheetContent, setSheetContent] = useState(null);
+
+  const { MATHPIX_API_ENDPOINT, MATHPIX_API_KEY, MATHPIX_APP_ID } =
+    Constants.manifest.extra;
+
+  const resetMathPixStates = () => {
+    setAsciiMathData(null);
+    setImageProcessing(false);
+    setProcessingError(INITIAL_PROCESSINGERROR);
+  };
+
+  const computeMathOCR = ({ b64 }) => {
+    const API_HEADERS = {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+        app_id: MATHPIX_APP_ID,
+        app_key: MATHPIX_API_KEY,
+      },
+    };
+
+    const API_SETTINGS = {
+      settings: {
+        method: "POST",
+        body: JSON.stringify({
+          src: "data:image/jpeg;base64," + b64,
+          formats: ["text", "data", "html"],
+          data_options: {
+            include_asciimath: true,
+            include_latex: false,
+          },
+        }),
+      },
+    };
+
+    fetch(MATHPIX_API_ENDPOINT, {
+      ...API_HEADERS,
+      ...API_SETTINGS.settings,
+    })
+      .then((res) => {
+        return res.json();
+      })
+      .then((data) => {
+        console.log(JSON.stringify(data));
+        try {
+          let asciimathArray = data.data;
+          if (!asciimathArray || asciimathArray.length == 0) {
+            throw "No mathematical input recognized";
+          } else {
+            const asciimathValues = asciimathArray.map((item) => {
+              return item.value;
+            });
+            console.log("asciimath", asciimathValues);
+            setAsciiMathData(asciimathValues.join());
+            setImageProcessing(false);
+          }
+        } catch (err) {
+          setProcessingError({
+            error: "true",
+            message: err,
+          });
+          setImageProcessing(false);
+        }
+      })
+      .catch((err) => {
+        console.log("Error making the API call", JSON.stringify(err));
+        setProcessingError({ error: true, message: err.message });
+        setImageProcessing(false);
+      });
+  };
 
   const renderContent = () => (
     <View
@@ -40,42 +117,43 @@ export default function HomeScreen({ navigation }) {
       <Cover>
         <CoverImage source={{ uri: resizedPhotoUri }} />
       </Cover>
-      {/* <Header>Solve</Header>
-      <Image
-        source={{ uri: resizedPhotoUri }}
-        style={{
-          height: 200,
-          width: "100%",
-          resizeMode: "contain",
-        }}
-      /> */}
-      <View style={{ padding: 20 }}>
-        <Header>Solve</Header>
-        <TextInput
-          value={asciiMathData}
-          onFocus={() => {
-            sheetRef.current.snapTo(0);
-          }}
-          onSubmitEditing={() => {
-            sheetRef.current.snapTo(1);
-          }}
-          style={{
-            fontSize: 18,
-          }}
-          onChangeText={(text) => setAsciiMathData(text)}
-        />
-        <CalcContainer
-          onPress={() => {
-            navigation.navigate("MyModal", {
-              inputString: asciiMathData,
-            });
-          }}
-        >
-          <Calculate>
-            <CalcText>Calculate</CalcText>
-          </Calculate>
-        </CalcContainer>
-      </View>
+      {imageProcessing ? (
+        <ActivityIndicator size="small" style={{ marginTop: 30 }} />
+      ) : (
+        <View style={{ padding: 20 }}>
+          {processingError.error ? (
+            <Header>{processingError.message}</Header>
+          ) : (
+            <>
+              <Header>Solve</Header>
+              <TextInput
+                value={asciiMathData}
+                onFocus={() => {
+                  sheetRef.current.snapTo(0);
+                }}
+                onSubmitEditing={() => {
+                  sheetRef.current.snapTo(1);
+                }}
+                style={{
+                  fontSize: 18,
+                }}
+                onChangeText={(text) => setAsciiMathData(text)}
+              />
+              <CalcContainer
+                onPress={() => {
+                  navigation.navigate("MyModal", {
+                    inputString: asciiMathData,
+                  });
+                }}
+              >
+                <Calculate>
+                  <CalcText>Calculate</CalcText>
+                </Calculate>
+              </CalcContainer>
+            </>
+          )}
+        </View>
+      )}
     </View>
   );
 
@@ -123,7 +201,7 @@ export default function HomeScreen({ navigation }) {
   Dimensions.addEventListener("change", () => {
     // console.log("Orientation CHANGE ", isPortrait() ? "portrait" : "landscape");
     if (isLandscape()) {
-      setDeviceOrientation("landscape");
+      // setDeviceOrientation("landscape");
     } else {
       setDeviceOrientation("portrait");
     }
@@ -163,6 +241,8 @@ export default function HomeScreen({ navigation }) {
   };
 
   let compressImageAndSendToNewScreen = async (uri, clipImage = false) => {
+    setImageProcessing(true);
+    setIsSheetOpen(true);
     let manipulatorOptions = [];
     if (clipImage) {
       manipulatorOptions = [
@@ -189,8 +269,9 @@ export default function HomeScreen({ navigation }) {
         encoding: FileSystem.EncodingType.Base64,
       });
       setResizedPhotoUri(resizedPhoto.uri);
-      setSheetContent(renderContent);
       sheetRef.current.snapTo(1);
+      setBgImage(uri);
+      computeMathOCR({ b64: resizedB64 });
       // navigation.navigate("Details", {
       //   uri: resizedPhoto.uri,
       //   b64: resizedB64,
@@ -198,6 +279,20 @@ export default function HomeScreen({ navigation }) {
     } catch (err) {
       console.log(err);
     }
+  };
+
+  const CapturedView = () => {
+    return (
+      <>
+        <View>
+          <CapturedImage
+            source={{ uri: bgImage }}
+            style={{ resizeMode: "cover" }}
+            blurRadius={100}
+          />
+        </View>
+      </>
+    );
   };
   return (
     <Container>
@@ -209,17 +304,21 @@ export default function HomeScreen({ navigation }) {
         type={type}
       >
         {deviceOrientation === "portrait" ? (
-          <>
-            <LayerTop />
-            <LayerCenter>
-              <LayerCenterFocussed />
-            </LayerCenter>
-            <LayerBottom />
-          </>
+          bgImage ? (
+            <OpacityLayout />
+          ) : (
+            <>
+              <LayerTop />
+              <LayerCenter>
+                <LayerCenterFocussed />
+              </LayerCenter>
+              <LayerBottom />
+            </>
+          )
         ) : (
           <></>
         )}
-        <CameraContainer>
+        <CameraContainer isSheetOpen={isSheetOpen}>
           <Wrapper>
             <PickImageContainer onPress={openImagePickerAsync}>
               <ImageIconComponent style={{ color: "#FFF" }} />
@@ -248,13 +347,24 @@ export default function HomeScreen({ navigation }) {
           </Wrapper>
         </CameraContainer>
       </Camera>
+
       <BottomSheet
         ref={sheetRef}
         initialSnap={2}
         snapPoints={[700, 400, 0]}
         borderRadius={40}
         renderContent={renderContent}
-        enabledBottomInitialAnimation={true}
+        enabledBottomInitialAnimation={false}
+        onOpenStart={() => {
+          console.log("Openinggg");
+          setIsSheetOpen(true);
+        }}
+        onCloseEnd={() => {
+          console.log("Clsoinggg");
+          resetMathPixStates();
+          setIsSheetOpen(false);
+          setBgImage(null);
+        }}
       />
     </Container>
   );
@@ -271,7 +381,7 @@ const CameraContainer = styled.View`
   bottom: 0;
   left: 0;
   right: 0;
-  background-color: transparent;
+  background-color: ${(p) => (p.isSheetOpen ? "transparent" : "transparent")};
   flex-direction: row;
   align-items: flex-end;
   /* margin-bottom: 50px; */
@@ -327,6 +437,15 @@ const LayerCenter = styled.View`
   height: 200px;
 `;
 
+const OpacityLayout = styled.View`
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  width: 100%;
+  background-color: "rgba(0, 0, 0, .8)";
+`;
+
 const LayerBottom = styled.View`
   position: absolute;
   top: 400px; /* 200 + 200 */
@@ -349,12 +468,8 @@ const Header = styled.Text`
 `;
 
 const CalcContainer = styled.TouchableOpacity`
-  /* position: absolute;
-  bottom: 40px; */
   width: 100%;
   margin-top: 20px;
-  /* align-items: center; */
-  /* justify-content: center; */
 `;
 
 const Calculate = styled.View`
@@ -382,4 +497,9 @@ const CoverImage = styled.Image`
   width: 100%;
   height: 100%;
   position: absolute;
+`;
+
+const CapturedImage = styled.Image`
+  height: 100%;
+  width: 100%;
 `;
