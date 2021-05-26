@@ -6,6 +6,7 @@ import {
   Dimensions,
   StyleSheet,
   Image,
+  TextInput,
 } from "react-native";
 import { Camera } from "expo-camera";
 import styled from "styled-components";
@@ -23,16 +24,23 @@ export default function HomeScreen({ navigation }) {
   const [deviceOrientation, setDeviceOrientation] = useState("portrait");
   const sheetRef = React.useRef(null);
   const [resizedPhotoUri, setResizedPhotoUri] = useState(null);
+  const [asciiMathData, setAsciiMathData] = useState(
+    "3x+2=5, 3x+2=5, 3x+2=5,3x+2=5, 3x+2=5,3x+2=5"
+  );
+  const [sheetContent, setSheetContent] = useState(null);
 
   const renderContent = () => (
     <View
       style={{
-        backgroundColor: "white",
-        padding: 20,
-        height: 500,
+        backgroundColor: "#FFF",
+        padding: 0,
+        height: 700,
       }}
     >
-      <Header>Solve</Header>
+      <Cover>
+        <CoverImage source={{ uri: resizedPhotoUri }} />
+      </Cover>
+      {/* <Header>Solve</Header>
       <Image
         source={{ uri: resizedPhotoUri }}
         style={{
@@ -40,7 +48,58 @@ export default function HomeScreen({ navigation }) {
           width: "100%",
           resizeMode: "contain",
         }}
-      />
+      /> */}
+      <View style={{ padding: 20 }}>
+        <Header>Solve</Header>
+        <TextInput
+          value={asciiMathData}
+          onFocus={() => {
+            sheetRef.current.snapTo(0);
+          }}
+          onSubmitEditing={() => {
+            sheetRef.current.snapTo(1);
+          }}
+          style={{
+            fontSize: 18,
+          }}
+          onChangeText={(text) => setAsciiMathData(text)}
+        />
+        <CalcContainer
+          onPress={() => {
+            navigation.navigate("MyModal", {
+              inputString: asciiMathData,
+            });
+          }}
+        >
+          <Calculate>
+            <CalcText>Calculate</CalcText>
+          </Calculate>
+        </CalcContainer>
+      </View>
+    </View>
+  );
+
+  const renderHeader = () => (
+    <View
+      style={{
+        backgroundColor: "#FFF",
+        shadowColor: "#000000",
+        paddingTop: 20,
+        borderTopLeftRadius: 20,
+        borderTopRightRadius: 20,
+      }}
+    >
+      <View style={{ alignItems: "center" }}>
+        <View
+          style={{
+            width: 40,
+            height: 8,
+            borderRadius: 4,
+            backgroundColor: "#00000040",
+            marginBottom: 10,
+          }}
+        />
+      </View>
     </View>
   );
 
@@ -130,7 +189,8 @@ export default function HomeScreen({ navigation }) {
         encoding: FileSystem.EncodingType.Base64,
       });
       setResizedPhotoUri(resizedPhoto.uri);
-      sheetRef.current.snapTo(0);
+      setSheetContent(renderContent);
+      sheetRef.current.snapTo(1);
       // navigation.navigate("Details", {
       //   uri: resizedPhoto.uri,
       //   b64: resizedB64,
@@ -190,9 +250,11 @@ export default function HomeScreen({ navigation }) {
       </Camera>
       <BottomSheet
         ref={sheetRef}
-        snapPoints={[500, 300, 0]}
-        borderRadius={10}
+        initialSnap={2}
+        snapPoints={[700, 400, 0]}
+        borderRadius={40}
         renderContent={renderContent}
+        enabledBottomInitialAnimation={true}
       />
     </Container>
   );
@@ -223,6 +285,7 @@ const CameraButton = styled.View`
   width: 70px;
   height: 70px;
   border-color: white;
+  z-index: 10;
   /* margin-bottom: 50px; */
 `;
 
@@ -280,7 +343,43 @@ const LayerCenterFocussed = styled.View`
 `;
 
 const Header = styled.Text`
-  font-weight: 800;
-  font-size: 32px;
-  margin-bottom: 20px;
+  font-weight: 700;
+  font-size: 28px;
+  margin-bottom: 10px;
+`;
+
+const CalcContainer = styled.TouchableOpacity`
+  /* position: absolute;
+  bottom: 40px; */
+  width: 100%;
+  margin-top: 20px;
+  /* align-items: center; */
+  /* justify-content: center; */
+`;
+
+const Calculate = styled.View`
+  width: 100%;
+  height: 54px;
+  margin: auto;
+  border-radius: 10px;
+  background-color: #000;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
+`;
+
+const CalcText = styled.Text`
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+`;
+
+const Cover = styled.View`
+  height: 200px;
+`;
+
+const CoverImage = styled.Image`
+  width: 100%;
+  height: 100%;
+  position: absolute;
 `;
