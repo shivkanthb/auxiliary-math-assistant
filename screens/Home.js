@@ -4,8 +4,6 @@ import {
   View,
   TouchableOpacity,
   Dimensions,
-  StyleSheet,
-  Image,
   TextInput,
   ActivityIndicator,
 } from "react-native";
@@ -18,6 +16,9 @@ import * as ImageManipulator from "expo-image-manipulator";
 import BottomSheet from "reanimated-bottom-sheet";
 import Constants from "expo-constants";
 
+const { MATHPIX_API_ENDPOINT, MATHPIX_API_KEY, MATHPIX_APP_ID } =
+  Constants.manifest.extra;
+
 export default function HomeScreen({ navigation }) {
   const [hasPermission, setHasPermission] = useState(null);
   const [type, setType] = useState(Camera.Constants.Type.back);
@@ -26,7 +27,6 @@ export default function HomeScreen({ navigation }) {
   const sheetRef = React.useRef(null);
   const [resizedPhotoUri, setResizedPhotoUri] = useState(null);
   const [isSheetOpen, setIsSheetOpen] = useState(false);
-  const [bgImage, setBgImage] = useState(null);
   const [asciiMathData, setAsciiMathData] = useState(null);
   const [imageProcessing, setImageProcessing] = useState(false);
   const INITIAL_PROCESSINGERROR = {
@@ -36,9 +36,6 @@ export default function HomeScreen({ navigation }) {
   const [processingError, setProcessingError] = useState(
     INITIAL_PROCESSINGERROR
   );
-
-  const { MATHPIX_API_ENDPOINT, MATHPIX_API_KEY, MATHPIX_APP_ID } =
-    Constants.manifest.extra;
 
   const resetMathPixStates = () => {
     setAsciiMathData(null);
@@ -107,13 +104,7 @@ export default function HomeScreen({ navigation }) {
   };
 
   const renderContent = () => (
-    <View
-      style={{
-        backgroundColor: "#FFF",
-        padding: 0,
-        height: 700,
-      }}
-    >
+    <BottomSheetContainer>
       <Cover>
         <CoverImage source={{ uri: resizedPhotoUri }} />
       </Cover>
@@ -139,22 +130,20 @@ export default function HomeScreen({ navigation }) {
                 }}
                 onChangeText={(text) => setAsciiMathData(text)}
               />
-              <CalcContainer
+              <Calculate
                 onPress={() => {
                   navigation.navigate("MyModal", {
                     inputString: asciiMathData,
                   });
                 }}
               >
-                <Calculate>
-                  <CalcText>Calculate</CalcText>
-                </Calculate>
-              </CalcContainer>
+                <CalcText>Calculate</CalcText>
+              </Calculate>
             </>
           )}
         </View>
       )}
-    </View>
+    </BottomSheetContainer>
   );
 
   const renderHeader = () => (
@@ -270,7 +259,6 @@ export default function HomeScreen({ navigation }) {
       });
       setResizedPhotoUri(resizedPhoto.uri);
       sheetRef.current.snapTo(1);
-      setBgImage(uri);
       computeMathOCR({ b64: resizedB64 });
       // navigation.navigate("Details", {
       //   uri: resizedPhoto.uri,
@@ -281,19 +269,6 @@ export default function HomeScreen({ navigation }) {
     }
   };
 
-  const CapturedView = () => {
-    return (
-      <>
-        <View>
-          <CapturedImage
-            source={{ uri: bgImage }}
-            style={{ resizeMode: "cover" }}
-            blurRadius={100}
-          />
-        </View>
-      </>
-    );
-  };
   return (
     <Container>
       <Camera
@@ -304,7 +279,7 @@ export default function HomeScreen({ navigation }) {
         type={type}
       >
         {deviceOrientation === "portrait" ? (
-          bgImage ? (
+          isSheetOpen ? (
             <OpacityLayout />
           ) : (
             <>
@@ -356,14 +331,11 @@ export default function HomeScreen({ navigation }) {
         renderContent={renderContent}
         enabledBottomInitialAnimation={false}
         onOpenStart={() => {
-          console.log("Openinggg");
           setIsSheetOpen(true);
         }}
         onCloseEnd={() => {
-          console.log("Clsoinggg");
           resetMathPixStates();
           setIsSheetOpen(false);
-          setBgImage(null);
         }}
       />
     </Container>
@@ -384,8 +356,8 @@ const CameraContainer = styled.View`
   background-color: ${(p) => (p.isSheetOpen ? "transparent" : "transparent")};
   flex-direction: row;
   align-items: flex-end;
-  /* margin-bottom: 50px; */
 `;
+
 const CameraButton = styled.View`
   border-width: 2px;
   border-radius: 35px;
@@ -396,7 +368,6 @@ const CameraButton = styled.View`
   height: 70px;
   border-color: white;
   z-index: 10;
-  /* margin-bottom: 50px; */
 `;
 
 const FlipButtonContainer = styled.TouchableOpacity`
@@ -467,15 +438,10 @@ const Header = styled.Text`
   margin-bottom: 10px;
 `;
 
-const CalcContainer = styled.TouchableOpacity`
-  width: 100%;
+const Calculate = styled.TouchableOpacity`
   margin-top: 20px;
-`;
-
-const Calculate = styled.View`
   width: 100%;
   height: 54px;
-  margin: auto;
   border-radius: 10px;
   background-color: #000;
   align-items: center;
@@ -502,4 +468,9 @@ const CoverImage = styled.Image`
 const CapturedImage = styled.Image`
   height: 100%;
   width: 100%;
+`;
+
+const BottomSheetContainer = styled.View`
+  background-color: #fff;
+  height: 700px;
 `;
