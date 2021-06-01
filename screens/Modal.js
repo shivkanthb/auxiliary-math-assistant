@@ -5,10 +5,11 @@ import {
   View,
   ActivityIndicator,
   Text,
+  Linking,
 } from "react-native";
 import { WebView } from "react-native-webview";
 import styled from "styled-components";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, EvilIcons } from "@expo/vector-icons";
 import Card from "../components/Card";
 import Constants from "expo-constants";
 
@@ -41,6 +42,10 @@ export default function ModalScreen({ route, navigation }) {
         body: JSON.stringify(data),
       });
       const result = await response.json();
+      if (result.error) {
+        throw new Error(result.error?.message);
+      }
+      console.log(result);
       setApiResult(result.queryresult);
       setLoading(false);
     } catch (err) {
@@ -63,10 +68,22 @@ export default function ModalScreen({ route, navigation }) {
         </CloseView>
       </DismissContainer>
       {apiError ? (
-        <View style={{ marginTop: 90 }}>
-          <Text style={{ textAlign: "center" }}>
-            Something went wrong. Try again later!
+        <View style={{ marginTop: 120 }}>
+          <Text style={{ textAlign: "center", fontSize: 16 }}>
+            Something went wrong 🤕
           </Text>
+          <WolframButton
+            onPress={() =>
+              Linking.openURL(
+                "https://www.wolframalpha.com/input/?i=" + inputString
+              )
+            }
+          >
+            <Text style={{ color: "white", fontSize: 14, fontWeight: "500" }}>
+              Try on WolframAlpha
+            </Text>
+            <EvilIcons name="external-link" size={22} color="white" />
+          </WolframButton>
         </View>
       ) : null}
       <ScrollView showsVerticalScrollIndicator={false}>
@@ -118,4 +135,17 @@ const CloseView = styled.View`
   border-radius: 16px;
   box-shadow: 0 5px 10px rgba(0, 0, 0, 0.15);
   justify-content: center;
+`;
+
+const WolframButton = styled.TouchableOpacity`
+  padding: 20px 20px;
+  max-width: 250px;
+  align-items: center;
+  align-content: center;
+  justify-content: center;
+  margin: 40px auto 0;
+  background-color: #ffa530;
+  border-radius: 30px;
+  display: flex;
+  flex-direction: row;
 `;
