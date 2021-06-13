@@ -3,7 +3,7 @@ import "dotenv/config";
 export default {
   name: "Euler Assist",
   slug: "euler",
-  version: "1.0.4",
+  version: "1.0.5",
   orientation: "portrait",
   icon: "./assets/euler.png",
   splash: {
